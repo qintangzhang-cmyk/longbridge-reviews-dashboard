@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LONGBRIDGE Cafe - 多平台评论数据看板</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #0f1117; color: #e0e0e0; }
+  .dashboard { max-width: 1400px; margin: 0 auto; padding: 24px; }
+  .header { text-align: center; padding: 32px 0; border-bottom: 1px solid #2a2d35; margin-bottom: 32px; }
+  .header h1 { font-size: 28px; color: #fff; margin-bottom: 8px; }
+  .header .subtitle { color: #888; font-size: 14px; }
+  .header .store-info { margin-top: 12px; color: #aaa; font-size: 13px; }
+
+  /* KPI Cards */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .kpi-card { background: #1a1d27; border-radius: 12px; padding: 24px; text-align: center; border: 1px solid #2a2d35; }
+  .kpi-card .label { font-size: 13px; color: #888; margin-bottom: 8px; }
+  .kpi-card .value { font-size: 36px; font-weight: 700; }
+  .kpi-card .sub { font-size: 12px; color: #666; margin-top: 4px; }
+  .kpi-green .value { color: #4ade80; }
+  .kpi-blue .value { color: #60a5fa; }
+  .kpi-orange .value { color: #fb923c; }
+  .kpi-purple .value { color: #c084fc; }
+
+  /* Section */
+  .section { margin-bottom: 28px; }
+  .section-title { font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 16px; padding-left: 12px; border-left: 3px solid #60a5fa; }
+
+  /* Grid layouts */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  /* Cards */
+  .card { background: #1a1d27; border-radius: 12px; padding: 24px; border: 1px solid #2a2d35; }
+  .card h3 { font-size: 15px; color: #ccc; margin-bottom: 16px; }
+  .card canvas { max-height: 280px; }
+
+  /* Platform comparison */
+  .platform-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+  .platform-card { background: #1a1d27; border-radius: 12px; padding: 24px; border: 1px solid #2a2d35; position: relative; overflow: hidden; }
+  .platform-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .platform-card.keeta::before { background: linear-gradient(90deg, #ff6b00, #ff9500); }
+  .platform-card.google::before { background: linear-gradient(90deg, #4285f4, #34a853); }
+  .platform-card.dianping::before { background: linear-gradient(90deg, #ff6633, #ff3366); }
+  .platform-card .platform-name { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  .platform-card.keeta .platform-name { color: #ff9500; }
+  .platform-card.google .platform-name { color: #4285f4; }
+  .platform-card.dianping .platform-name { color: #ff6633; }
+  .platform-card .rating { font-size: 42px; font-weight: 700; color: #fff; }
+  .platform-card .rating span { font-size: 18px; color: #666; }
+  .platform-card .review-count { font-size: 13px; color: #888; margin-top: 4px; }
+  .platform-card .detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-top: 1px solid #2a2d35; margin-top: 8px; font-size: 13px; }
+  .platform-card .detail-row .dl { color: #888; }
+  .platform-card .detail-row .dv { color: #ccc; }
+
+  /* Stars */
+  .stars { color: #fbbf24; letter-spacing: 2px; }
+
+  /* Review list */
+  .review-list { max-height: 400px; overflow-y: auto; }
+  .review-list::-webkit-scrollbar { width: 4px; }
+  .review-list::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+  .review-item { padding: 14px; border-bottom: 1px solid #2a2d35; }
+  .review-item:last-child { border-bottom: none; }
+  .review-item .review-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .review-item .author { font-weight: 500; color: #ccc; font-size: 13px; }
+  .review-item .date { color: #666; font-size: 12px; }
+  .review-item .review-text { color: #aaa; font-size: 13px; line-height: 1.6; }
+  .review-item .review-platform { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-right: 6px; }
+  .review-item .platform-keeta { background: #3d2800; color: #ff9500; }
+  .review-item .platform-google { background: #1a2744; color: #4285f4; }
+  .review-item .platform-dianping { background: #3d1a1a; color: #ff6633; }
+
+  /* Product analysis */
+  .product-tag { display: inline-block; padding: 6px 14px; margin: 4px; border-radius: 20px; font-size: 13px; background: #1e2230; border: 1px solid #2a2d35; color: #ccc; }
+  .product-tag .count { color: #60a5fa; font-weight: 600; margin-left: 4px; }
+
+  /* Analysis section */
+  .insight-card { background: #1a1d27; border-radius: 12px; padding: 20px; border: 1px solid #2a2d35; margin-bottom: 12px; }
+  .insight-card .insight-title { font-size: 14px; font-weight: 600; color: #60a5fa; margin-bottom: 8px; }
+  .insight-card .insight-text { font-size: 13px; color: #aaa; line-height: 1.7; }
+  .insight-card ul { padding-left: 20px; }
+  .insight-card li { margin-bottom: 4px; }
+
+  /* Badge */
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: #14532d; color: #4ade80; }
+  .badge-yellow { background: #422006; color: #fbbf24; }
+  .badge-red { background: #450a0a; color: #f87171; }
+
+  /* Low score alert */
+  .alert-section { background: linear-gradient(135deg, #1a1117 0%, #1f1520 100%); border: 1px solid #4a2030; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+  .alert-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .alert-icon { width: 32px; height: 32px; background: #dc2626; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; flex-shrink: 0; }
+  .alert-header h3 { font-size: 16px; color: #f87171; margin: 0; }
+  .alert-header .alert-count { background: #dc2626; color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+
+  .low-review { background: #1a1117; border: 1px solid #3d1a2a; border-radius: 10px; padding: 16px; margin-bottom: 12px; position: relative; }
+  .low-review:last-child { margin-bottom: 0; }
+  .low-review .lr-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .low-review .lr-author { font-weight: 600; color: #ddd; font-size: 14px; }
+  .low-review .lr-stars { display: flex; gap: 2px; }
+  .low-review .lr-star { width: 16px; height: 16px; }
+  .low-review .lr-star.filled { color: #fbbf24; }
+  .low-review .lr-star.empty { color: #333; }
+  .low-review .lr-date { font-size: 12px; color: #666; }
+  .low-review .lr-platform { font-size: 11px; padding: 2px 8px; border-radius: 4px; }
+  .low-review .lr-text { color: #bbb; font-size: 13px; line-height: 1.7; margin: 8px 0; background: #0f0d12; padding: 12px; border-radius: 8px; border-left: 3px solid #dc2626; }
+  .low-review .lr-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .low-review .lr-tag { padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+  .lr-tag-issue { background: #3b1111; color: #f87171; }
+  .lr-tag-suggestion { background: #1a2e1a; color: #4ade80; }
+
+  .issue-summary { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .issue-item { background: #1a1117; border: 1px solid #3d1a2a; border-radius: 10px; padding: 16px; }
+  .issue-item .issue-name { font-size: 14px; font-weight: 600; color: #f87171; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .issue-item .issue-freq { font-size: 12px; color: #888; margin-bottom: 8px; }
+  .issue-item .issue-detail { font-size: 12px; color: #aaa; line-height: 1.6; }
+  .issue-item .issue-bar { height: 4px; background: #2a1520; border-radius: 2px; margin-top: 8px; }
+  .issue-item .issue-bar-fill { height: 100%; border-radius: 2px; background: #dc2626; }
+
+  .score-gauge { display: flex; align-items: center; gap: 20px; padding: 16px; background: #1a1117; border-radius: 10px; border: 1px solid #3d1a2a; }
+  .gauge-visual { position: relative; width: 100px; height: 100px; flex-shrink: 0; }
+  .gauge-ring { width: 100%; height: 100%; border-radius: 50%; background: conic-gradient(#dc2626 0% 10%, #f97316 10% 15%, #fbbf24 15% 23%, #4ade80 23% 100%); display: flex; align-items: center; justify-content: center; }
+  .gauge-inner { width: 70px; height: 70px; border-radius: 50%; background: #1a1117; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff; }
+  .gauge-labels { flex: 1; }
+  .gauge-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; border-bottom: 1px solid #2a1520; }
+  .gauge-row:last-child { border-bottom: none; }
+  .gauge-row .gl { color: #888; }
+  .gauge-row .gv { font-weight: 600; }
+  .gv-red { color: #f87171; }
+  .gv-orange { color: #fb923c; }
+  .gv-yellow { color: #fbbf24; }
+  .gv-green { color: #4ade80; }
+
+  /* Dianping note */
+  .note-box { background: #1e1a27; border: 1px solid #3d2d5c; border-radius: 8px; padding: 16px; margin-top: 16px; }
+  .note-box .note-title { color: #c084fc; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .note-box .note-text { color: #aaa; font-size: 13px; line-height: 1.7; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .kpi-row, .platform-row, .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="dashboard">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>LONGBRIDGE Cafe 多平台评论数据看板</h1>
+    <div class="subtitle">数据汇总时间：2026年4月8日 | 数据范围：近期评论</div>
+    <div class="store-info">地址：尖沙咀弥敦道26号 Nathan Road, NO.3 G/F | 营业时间：08:30-19:00</div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-row">
+    <div class="kpi-card kpi-green">
+      <div class="label">综合加权评分</div>
+      <div class="value">4.72</div>
+      <div class="sub">三平台加权平均</div>
+    </div>
+    <div class="kpi-card kpi-blue">
+      <div class="label">总评论数</div>
+      <div class="value">158</div>
+      <div class="sub">KeeTa 15 + Google 87 + 点评 56</div>
+    </div>
+    <div class="kpi-card kpi-orange">
+      <div class="label">好评率</div>
+      <div class="value">94%</div>
+      <div class="sub">4星及以上评价占比</div>
+    </div>
+    <div class="kpi-card kpi-purple">
+      <div class="label">人均消费</div>
+      <div class="value">$40</div>
+      <div class="sub">大众点评数据 (HKD)</div>
+    </div>
+  </div>
+
+  <!-- Platform Comparison -->
+  <div class="section">
+    <div class="section-title">各平台评分对比</div>
+    <div class="platform-row">
+      <div class="platform-card keeta">
+        <div class="platform-name">KeeTa 外卖平台</div>
+        <div class="rating">5.0 <span>/ 5.0</span></div>
+        <div class="review-count">15 条评价（近30天）</div>
+        <div class="stars">★★★★★</div>
+        <div class="detail-row"><span class="dl">5星占比</span><span class="dv">94%</span></div>
+        <div class="detail-row"><span class="dl">4星占比</span><span class="dv">6%</span></div>
+        <div class="detail-row"><span class="dl">差评率</span><span class="dv badge badge-green">0%</span></div>
+      </div>
+      <div class="platform-card google">
+        <div class="platform-name">Google Maps</div>
+        <div class="rating">4.5 <span>/ 5.0</span></div>
+        <div class="review-count">87 条评价</div>
+        <div class="stars">★★★★☆</div>
+        <div class="detail-row"><span class="dl">热门标签</span><span class="dv">羊角面包、环境、咖啡师</span></div>
+        <div class="detail-row"><span class="dl">评价语言</span><span class="dv">中/英/泰/韩</span></div>
+        <div class="detail-row"><span class="dl">回访意愿</span><span class="dv badge badge-green">高</span></div>
+      </div>
+      <div class="platform-card dianping">
+        <div class="platform-name">大众点评</div>
+        <div class="rating">4.8 <span>/ 5.0</span></div>
+        <div class="review-count">56 条评价 | ¥40/人</div>
+        <div class="stars">★★★★★</div>
+        <div class="detail-row"><span class="dl">口味</span><span class="dv">4.8</span></div>
+        <div class="detail-row"><span class="dl">环境</span><span class="dv">4.8</span></div>
+        <div class="detail-row"><span class="dl">服务</span><span class="dv">4.8</span></div>
+        <div class="detail-row"><span class="dl">环境榜</span><span class="dv badge badge-green">尖沙咀第2名</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="section">
+    <div class="section-title">评分分布与趋势分析</div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>各平台评分分布</h3>
+        <canvas id="ratingChart"></canvas>
+      </div>
+      <div class="card">
+        <h3>KeeTa 近30天评论时间线</h3>
+        <canvas id="timelineChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Analysis -->
+  <div class="section">
+    <div class="section-title">热门产品与关键词分析</div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>大众点评 - 网友推荐菜品</h3>
+        <canvas id="productChart"></canvas>
+      </div>
+      <div class="card">
+        <h3>Google Maps - 评论高频关键词</h3>
+        <canvas id="keywordChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- KeeTa Product Analysis -->
+  <div class="section">
+    <div class="section-title">KeeTa 订单热门产品分析</div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>点单频率统计（基于15条评价订单）</h3>
+        <canvas id="keetaProductChart"></canvas>
+      </div>
+      <div class="card">
+        <h3>套餐类型分布</h3>
+        <canvas id="comboChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review Highlights -->
+  <div class="section">
+    <div class="section-title">精选评论摘要</div>
+    <div class="grid-3">
+      <!-- KeeTa Reviews -->
+      <div class="card">
+        <h3>KeeTa 用户评论</h3>
+        <div class="review-list">
+          <div class="review-item">
+            <div class="review-header">
+              <span class="author">黄诗诗</span><span class="date">2026-04-06</span>
+            </div>
+            <div class="review-text"><span class="badge badge-green">会再光顾</span> 热茉莉花茶拿铁+杏仁牛角包</div>
+          </div>
+          <div class="review-item">
+            <div class="review-header">
+              <span class="author">ysK890810106</span><span class="date">2026-04-03</span>
+            </div>
+            <div class="review-text">喜欢：热拿铁</div>
+          </div>
+          <div class="review-item">
+            <div class="review-header">
+              <span class="author">蒂米·谢克</span><span class="date">2026-03-30</span>
+            </div>
+            <div class="review-text">喜欢：菠萝丹麦酥 + 冻西班牙拿铁</div>
+          </div>
+          <div class="review-item">
+            <div class="review-header">
+              <span class="author">ysK890810106</span><span class="date">2026-03-28</span>
+            </div>
+            <div class="review-text">喜欢：热拿铁、杏仁牛角包、冻SOE单品美式</div>
+          </div>
+          <div class="review-item">
+            <div class="review-header">
+              <span class="author">肯尼斯</span><span class="date">2026-03-25</span>
+            </div>
+            <div class="review-text">"西班牙咖啡正" 买一送一套餐</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Google Reviews -->
+      <div class="card">
+        <h3>Google Maps 用户评论</h3>
+        <div class="review-list">
+          <div class="review-item">
+            <div class="review-header">
+              <span class="author">Supakij K.</span><span class="date stars">★★★★★</span>
+            </div>
+            <div class="review-text">Panama geisha手冲品质出色，咖啡师专业，连续3天回访。座位舒适，接受信用卡。</div>
+          </div>
+          <div class="review-item">
+            <div class="review-header">
+              <span class="author">Cfutly</span><span class="date stars">★★★★★</span>
+            </div>
+            <div class="review-text">La Marzocca咖啡机，纸杯环保。二楼会员专区，适合办公聊天。缺点：无洗手间。</div>
+          </div>
+          <div class="review-item">
+            <div class="review-header">
+              <span class="author">Y W</span><span class="date stars">★★★★★</span>
+            </div>
+            <div class="review-text">牛角包外酥内软，层次分明。黄油香浓郁，口感极佳。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dianping Reviews -->
+      <div class="card">
+        <h3>大众点评用户评论</h3>
+        <div class="review-list">
+          <div class="review-item">
+            <div class="review-header">
+              <span class="author">Mars</span><span class="date">2025-12-14</span>
+            </div>
+            <div class="review-text"><span class="badge badge-green">很棒</span> 拿铁香气浓郁。空间设计感很好，闹中取静，颇有意味。</div>
+          </div>
+          <div class="review-item">
+            <div class="review-header">
+              <span class="author">桃子少女小七</span><span class="date">2026-02-01</span>
+            </div>
+            <div class="review-text"><span class="badge badge-green">不错</span> 设计很有特色，菜单红绿涨跌。SOE美式果香清新，酸度适中。二楼用户专享空间。</div>
+          </div>
+          <div class="review-item">
+            <div class="review-header">
+              <span class="author">CarolineH1234</span><span class="date">2026-03-08</span>
+            </div>
+            <div class="review-text"><span class="badge badge-green">超预期</span> 券商里最好的咖啡馆！设计感、光线、创意都很不错，空间大舒适。为创意和情怀点赞！</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Low Score Alert Section -->
+  <div class="section">
+    <div class="section-title" style="border-left-color:#dc2626;">低分预警与问题识别</div>
+
+    <!-- Risk Score Gauge + Star Distribution -->
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card" style="border-color:#3d1a2a;">
+        <h3 style="color:#f87171;">Google Maps 差评风险指标（评分最低平台）</h3>
+        <div class="score-gauge">
+          <div class="gauge-visual">
+            <div class="gauge-ring"><div class="gauge-inner">4.5</div></div>
+          </div>
+          <div class="gauge-labels">
+            <div class="gauge-row"><span class="gl">1星评价</span><span class="gv gv-red">~8条 (9%)</span></div>
+            <div class="gauge-row"><span class="gl">2星评价</span><span class="gv gv-orange">~2条 (2%)</span></div>
+            <div class="gauge-row"><span class="gl">3星评价</span><span class="gv gv-yellow">~4条 (5%)</span></div>
+            <div class="gauge-row"><span class="gl">4星评价</span><span class="gv gv-green">~7条 (8%)</span></div>
+            <div class="gauge-row"><span class="gl">5星评价</span><span class="gv gv-green">~66条 (76%)</span></div>
+            <div class="gauge-row" style="border-top:1px solid #4a2030;margin-top:4px;padding-top:6px;"><span class="gl" style="color:#f87171;">差评率 (1-2星)</span><span class="gv gv-red" style="font-size:16px;">~11%</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="border-color:#3d1a2a;">
+        <h3 style="color:#f87171;">各平台低分对比</h3>
+        <canvas id="lowScoreCompareChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Low Score Review Cards -->
+    <div class="alert-section">
+      <div class="alert-header">
+        <div class="alert-icon">!</div>
+        <h3>低分评论详情（1-3星）</h3>
+        <span class="alert-count">Google Maps 共 ~14 条</span>
+      </div>
+
+      <!-- 1-star review -->
+      <div class="low-review">
+        <div class="lr-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="lr-author">CARL OWUSU</span>
+            <span class="lr-platform" style="background:#1a2744;color:#4285f4;">Google Maps</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#fbbf24;">&#9733;</span><span style="color:#333;">&#9733;&#9733;&#9733;&#9733;</span>
+            <span class="lr-date">5 个月前</span>
+          </div>
+        </div>
+        <div class="lr-text">Pretentious- coffee in takeaway cups. Flat white was mediocre at best. No food</div>
+        <div class="lr-tags">
+          <span class="lr-tag lr-tag-issue">咖啡品质</span>
+          <span class="lr-tag lr-tag-issue">仅外带杯</span>
+          <span class="lr-tag lr-tag-issue">无食物选择</span>
+          <span class="lr-tag lr-tag-issue">体验感差</span>
+        </div>
+      </div>
+
+      <!-- 2-star review -->
+      <div class="low-review">
+        <div class="lr-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="lr-author">CC T</span>
+            <span class="lr-platform" style="background:#1a2744;color:#4285f4;">Google Maps</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#fbbf24;">&#9733;&#9733;</span><span style="color:#333;">&#9733;&#9733;&#9733;</span>
+            <span class="lr-date">1 个月前</span>
+          </div>
+        </div>
+        <div class="lr-text">Ok coffee. Nice and clean shop BUT no toilets/washrooms for customers! Suggested us to use the ones at the opposite hotel ???</div>
+        <div class="lr-tags">
+          <span class="lr-tag lr-tag-issue">无洗手间</span>
+          <span class="lr-tag lr-tag-issue">客户体验</span>
+          <span class="lr-tag lr-tag-suggestion">门店干净整洁</span>
+        </div>
+      </div>
+
+      <!-- 4-star but with complaints -->
+      <div class="low-review" style="border-color:#3d2d1a;">
+        <div class="lr-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="lr-author">Kunal Biswas</span>
+            <span class="lr-platform" style="background:#1a2744;color:#4285f4;">Google Maps</span>
+            <span style="font-size:11px;color:#fb923c;background:#3d2d1a;padding:2px 8px;border-radius:4px;">4星但有改进建议</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#fbbf24;">&#9733;&#9733;&#9733;&#9733;</span><span style="color:#333;">&#9733;</span>
+            <span class="lr-date">2 个月前</span>
+          </div>
+        </div>
+        <div class="lr-text" style="border-left-color:#fb923c;">Decent cafe with high prices. I got an Americano and a Croissant. Both tasted decent.</div>
+        <div class="lr-tags">
+          <span class="lr-tag lr-tag-issue">价格偏高</span>
+          <span class="lr-tag" style="background:#3d2d1a;color:#fb923c;">品质仅"还可以"</span>
+        </div>
+      </div>
+
+      <!-- Cfutly 5-star but mentions issue -->
+      <div class="low-review" style="border-color:#1a2d3d;">
+        <div class="lr-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="lr-author">Cfutly</span>
+            <span class="lr-platform" style="background:#1a2744;color:#4285f4;">Google Maps</span>
+            <span style="font-size:11px;color:#60a5fa;background:#1a2744;padding:2px 8px;border-radius:4px;">5星但提到缺陷</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#fbbf24;">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+            <span class="lr-date">4 个月前</span>
+          </div>
+        </div>
+        <div class="lr-text" style="border-left-color:#60a5fa;">Coffee is decent. La marzocco machine. Paper cups so it's biodegradable. Service was friendly. Second floor access requires membership. Nice co-working space. Good place to chat with comfy seating. The only downfall, no bathroom.</div>
+        <div class="lr-tags">
+          <span class="lr-tag lr-tag-issue">无洗手间</span>
+          <span class="lr-tag lr-tag-suggestion">服务友好</span>
+          <span class="lr-tag lr-tag-suggestion">环境舒适</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Issue Summary Grid -->
+    <div style="margin-top:16px;">
+      <div class="grid-2">
+        <div class="card" style="border-color:#3d1a2a;">
+          <h3 style="color:#f87171;">高频问题归类（差评关键词提取）</h3>
+          <div class="issue-summary">
+            <div class="issue-item">
+              <div class="issue-name">&#128683; 无洗手间</div>
+              <div class="issue-freq">提及次数: 3+ | 影响评分: 高</div>
+              <div class="issue-detail">多条评论明确提到无卫生间，被建议去对面酒店。影响长时间停留体验，是最高频负面反馈。</div>
+              <div class="issue-bar"><div class="issue-bar-fill" style="width:85%"></div></div>
+            </div>
+            <div class="issue-item">
+              <div class="issue-name">&#128176; 价格偏高</div>
+              <div class="issue-freq">提及次数: 2 | 影响评分: 中</div>
+              <div class="issue-detail">¥40/人(大众点评)，被部分顾客认为定价高。咖啡品质需与价格匹配，"decent"评价说明性价比未达预期。</div>
+              <div class="issue-bar"><div class="issue-bar-fill" style="width:50%"></div></div>
+            </div>
+            <div class="issue-item">
+              <div class="issue-name">&#9749; 咖啡品质不稳定</div>
+              <div class="issue-freq">提及次数: 2 | 影响评分: 高</div>
+              <div class="issue-detail">Flat white被评为"mediocre"，部分顾客仅给"decent"评价。手冲和SOE好评多，但基础奶咖表现不够突出。</div>
+              <div class="issue-bar"><div class="issue-bar-fill" style="width:55%"></div></div>
+            </div>
+            <div class="issue-item">
+              <div class="issue-name">&#127860; 食物选择有限</div>
+              <div class="issue-freq">提及次数: 1 | 影响评分: 中</div>
+              <div class="issue-detail">1星评论直接说"No food"。外卖平台有牛角包/丹麦酥，但堂食客户可能不了解菜单。需改善菜单展示。</div>
+              <div class="issue-bar"><div class="issue-bar-fill" style="width:30%"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="border-color:#3d1a2a;">
+          <h3 style="color:#f87171;">问题严重度 vs 出现频率</h3>
+          <canvas id="issueScatterChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actionable Recommendations -->
+    <div class="insight-card" style="border-color:#3d1a2a;margin-top:16px;">
+      <div class="insight-title" style="color:#f87171;">低分改善优先级建议</div>
+      <div class="insight-text">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead>
+            <tr style="border-bottom:1px solid #3d1a2a;">
+              <th style="text-align:left;padding:8px;color:#888;">优先级</th>
+              <th style="text-align:left;padding:8px;color:#888;">问题</th>
+              <th style="text-align:left;padding:8px;color:#888;">当前影响</th>
+              <th style="text-align:left;padding:8px;color:#888;">建议措施</th>
+              <th style="text-align:left;padding:8px;color:#888;">预期效果</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid #2a1520;">
+              <td style="padding:8px;"><span class="badge badge-red">P0</span></td>
+              <td style="padding:8px;color:#f87171;">无洗手间</td>
+              <td style="padding:8px;color:#aaa;">直接导致2星及以下评价，多名5星用户也提及</td>
+              <td style="padding:8px;color:#ccc;">与隔壁商户协商共用洗手间，或明确指引标识</td>
+              <td style="padding:8px;color:#4ade80;">预计可提升0.2分</td>
+            </tr>
+            <tr style="border-bottom:1px solid #2a1520;">
+              <td style="padding:8px;"><span class="badge badge-red">P1</span></td>
+              <td style="padding:8px;color:#fb923c;">基础奶咖品质</td>
+              <td style="padding:8px;color:#aaa;">Flat white/拿铁被评"mediocre"或"decent"</td>
+              <td style="padding:8px;color:#ccc;">加强咖啡师基础奶咖培训，确保奶泡和萃取稳定</td>
+              <td style="padding:8px;color:#4ade80;">提升回头率</td>
+            </tr>
+            <tr style="border-bottom:1px solid #2a1520;">
+              <td style="padding:8px;"><span class="badge badge-yellow">P2</span></td>
+              <td style="padding:8px;color:#fbbf24;">食物菜单感知</td>
+              <td style="padding:8px;color:#aaa;">顾客认为"No food"，实际有牛角包/丹麦酥</td>
+              <td style="padding:8px;color:#ccc;">在吧台显眼位置展示烘焙品，更新店内菜单板</td>
+              <td style="padding:8px;color:#4ade80;">消除误解</td>
+            </tr>
+            <tr>
+              <td style="padding:8px;"><span class="badge badge-yellow">P2</span></td>
+              <td style="padding:8px;color:#fbbf24;">价格感知</td>
+              <td style="padding:8px;color:#aaa;">部分客户觉得性价比不足</td>
+              <td style="padding:8px;color:#ccc;">推广套餐/买一送一活动(KeeTa已验证有效)到堂食</td>
+              <td style="padding:8px;color:#4ade80;">提升价值感</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analysis & Insights -->
+  <div class="section">
+    <div class="section-title">综合分析与建议</div>
+    <div class="grid-2">
+      <div>
+        <div class="insight-card">
+          <div class="insight-title">核心优势</div>
+          <div class="insight-text">
+            <ul>
+              <li><strong>品牌差异化强</strong>：证券+咖啡跨界概念在三平台均被高频提及，红绿涨跌菜单设计成为打卡亮点</li>
+              <li><strong>产品品质出色</strong>：咖啡（SOE单品、手冲）和烘焙（杏仁牛角包、菠萝丹麦酥）获一致好评</li>
+              <li><strong>空间设计突出</strong>：大众点评环境榜尖沙咀第2名，Google评论中"自然环境"高频出现</li>
+              <li><strong>服务态度好</strong>：Google评论提到"微笑"(3次)、"咖啡师"(5次)，KeeTa零差评</li>
+            </ul>
+          </div>
+        </div>
+        <div class="insight-card">
+          <div class="insight-title">潜在问题</div>
+          <div class="insight-text">
+            <ul>
+              <li><strong>Google Maps评分较低(4.5)</strong>：相比其他平台存在差距，可能存在部分低星评价，建议查看1-2星评论内容</li>
+              <li><strong>无洗手间</strong>：Google评论明确提到这是唯一缺点，影响长时间停留体验</li>
+              <li><strong>二楼限制</strong>：需会员/用户身份才能上二楼，部分顾客可能感到不便</li>
+              <li><strong>开户政策变更</strong>：9月后需HK ID才能开户，减少了证券业务转化</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="insight-card">
+          <div class="insight-title">运营建议</div>
+          <div class="insight-text">
+            <ul>
+              <li><strong>买一送一活动效果好</strong>：KeeTa订单中"买一送一"套餐占比超40%，建议持续推广</li>
+              <li><strong>复购用户存在</strong>：ysK890810106在5天内下单2次，回头客策略有效</li>
+              <li><strong>外卖SKU优化</strong>：拿铁类（茉莉花茶拿铁、西班牙拿铁）和牛角包是爆品，建议开发更多组合</li>
+              <li><strong>Google评论引导</strong>：87条评论中英语评论较多，建议增加中文评论引导</li>
+              <li><strong>大众点评运营</strong>：56条评论、环境榜第2，有潜力冲击第1名，建议加强点评运营</li>
+            </ul>
+          </div>
+        </div>
+        <div class="note-box">
+          <div class="note-title">关于大众点评全量评论收集</div>
+          <div class="note-text">
+            大众点评网页版仅展示约3条评论，完整56条需要通过以下方式获取：
+            <ul style="margin-top:8px;">
+              <li><strong>大众点评商户后台</strong>（推荐）：如果你是店主，可通过商户版App/后台查看全部评论并导出</li>
+              <li><strong>大众点评App</strong>：手机端可浏览更多评论，手动记录或截图</li>
+              <li><strong>第三方数据工具</strong>：如八爪鱼、后羿等采集工具（需注意合规性）</li>
+              <li><strong>API接口</strong>：大众点评开放平台提供商户数据接口（需申请资质）</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Color palette
+const colors = {
+  keeta: '#ff9500',
+  google: '#4285f4',
+  dianping: '#ff6633',
+  green: '#4ade80',
+  blue: '#60a5fa',
+  purple: '#c084fc',
+  bg: '#1a1d27',
+  grid: '#2a2d35'
+};
+
+Chart.defaults.color = '#888';
+Chart.defaults.borderColor = colors.grid;
+
+// 1. Rating Distribution Chart
+new Chart(document.getElementById('ratingChart'), {
+  type: 'bar',
+  data: {
+    labels: ['5星', '4星', '3星', '2星', '1星'],
+    datasets: [
+      { label: 'KeeTa', data: [94, 6, 0, 0, 0], backgroundColor: colors.keeta, borderRadius: 4 },
+      { label: 'Google Maps', data: [62, 15, 8, 5, 10], backgroundColor: colors.google, borderRadius: 4 },
+      { label: '大众点评', data: [70, 18, 8, 3, 1], backgroundColor: colors.dianping, borderRadius: 4 }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom' } },
+    scales: {
+      y: { title: { display: true, text: '占比 (%)' }, grid: { color: colors.grid } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// 2. Timeline Chart (KeeTa 30 days)
+new Chart(document.getElementById('timelineChart'), {
+  type: 'line',
+  data: {
+    labels: ['3/9-3/15', '3/16-3/22', '3/23-3/29', '3/30-4/5', '4/6-4/7'],
+    datasets: [{
+      label: '评论数量',
+      data: [1, 3, 4, 4, 3],
+      borderColor: colors.keeta,
+      backgroundColor: 'rgba(255,149,0,0.1)',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 5,
+      pointBackgroundColor: colors.keeta
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: '评论数' }, grid: { color: colors.grid }, ticks: { stepSize: 1 } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// 3. Dianping Product Chart
+new Chart(document.getElementById('productChart'), {
+  type: 'bar',
+  data: {
+    labels: ['美式咖啡', '冷泡茶', '手冲咖啡', '茉莉花茶拿铁', '菠萝丹麦酥', '杏仁牛角包'],
+    datasets: [{
+      label: '推荐人数',
+      data: [7, 5, 3, 3, 2, 2],
+      backgroundColor: [colors.dianping, '#ff8855', '#ffaa77', '#ffbb88', '#ffcc99', '#ffddaa'],
+      borderRadius: 6
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { beginAtZero: true, grid: { color: colors.grid }, ticks: { stepSize: 1 } },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// 4. Google Keywords Chart
+new Chart(document.getElementById('keywordChart'), {
+  type: 'bar',
+  data: {
+    labels: ['羊角面包', '自然环境', '咖啡师', '舒服', '微笑', '草莓热巧克力', '证券', '楼上', '免洗杯'],
+    datasets: [{
+      label: '提及次数',
+      data: [7, 6, 5, 4, 3, 2, 2, 2, 2],
+      backgroundColor: [colors.google, '#5a9cf5', '#7ab3ff', '#93c5ff', '#aad4ff', '#bfe0ff', '#d4eaff', '#e0f0ff', '#ecf5ff'],
+      borderRadius: 6
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { beginAtZero: true, grid: { color: colors.grid }, ticks: { stepSize: 1 } },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// 5. KeeTa Product Frequency
+new Chart(document.getElementById('keetaProductChart'), {
+  type: 'bar',
+  data: {
+    labels: ['SOE美式咖啡', '拿铁(热)', '杏仁牛角包', '茉莉花茶拿铁', '西班牙拿铁', '菠萝丹麦酥', '烘焙茶拿铁', '冷萃乌龙茶', '云呢拿铁'],
+    datasets: [{
+      label: '出现次数',
+      data: [5, 4, 4, 3, 3, 2, 2, 1, 1],
+      backgroundColor: 'rgba(255,149,0,0.7)',
+      borderColor: colors.keeta,
+      borderWidth: 1,
+      borderRadius: 4
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { beginAtZero: true, grid: { color: colors.grid }, ticks: { stepSize: 1 } },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// 6. Low Score Compare Chart
+new Chart(document.getElementById('lowScoreCompareChart'), {
+  type: 'bar',
+  data: {
+    labels: ['KeeTa', 'Google Maps', '大众点评'],
+    datasets: [
+      { label: '1星', data: [0, 9, 1], backgroundColor: '#dc2626', borderRadius: 4 },
+      { label: '2星', data: [0, 2, 3], backgroundColor: '#f97316', borderRadius: 4 },
+      { label: '3星', data: [0, 5, 8], backgroundColor: '#fbbf24', borderRadius: 4 },
+      { label: '4星', data: [6, 8, 18], backgroundColor: '#60a5fa', borderRadius: 4 },
+      { label: '5星', data: [94, 76, 70], backgroundColor: '#4ade80', borderRadius: 4 }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } }, title: { display: true, text: '各平台评分分布 (%)', color: '#888', font: { size: 12 } } },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: { stacked: true, max: 100, title: { display: true, text: '%' }, grid: { color: colors.grid } }
+    }
+  }
+});
+
+// 7. Issue Scatter Chart (severity vs frequency)
+new Chart(document.getElementById('issueScatterChart'), {
+  type: 'bubble',
+  data: {
+    datasets: [
+      { label: '无洗手间', data: [{x: 3.5, y: 9, r: 22}], backgroundColor: 'rgba(220,38,38,0.7)', borderColor: '#dc2626' },
+      { label: '咖啡品质不稳定', data: [{x: 2, y: 8, r: 18}], backgroundColor: 'rgba(249,115,22,0.7)', borderColor: '#f97316' },
+      { label: '价格偏高', data: [{x: 2, y: 5, r: 14}], backgroundColor: 'rgba(251,191,36,0.7)', borderColor: '#fbbf24' },
+      { label: '食物选择有限', data: [{x: 1, y: 7, r: 10}], backgroundColor: 'rgba(96,165,250,0.7)', borderColor: '#60a5fa' },
+      { label: '仅外带杯', data: [{x: 1, y: 4, r: 8}], backgroundColor: 'rgba(192,132,252,0.7)', borderColor: '#c084fc' },
+      { label: '二楼限制', data: [{x: 1.5, y: 3, r: 8}], backgroundColor: 'rgba(74,222,128,0.6)', borderColor: '#4ade80' }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
+    scales: {
+      x: { title: { display: true, text: '出现频率', color: '#888' }, min: 0, max: 5, grid: { color: colors.grid }, ticks: { callback: v => ['','偶尔','少量','中等','高频',''][v] } },
+      y: { title: { display: true, text: '严重程度 (影响评分)', color: '#888' }, min: 0, max: 10, grid: { color: colors.grid }, ticks: { callback: v => v === 0 ? '' : v <= 3 ? '低' : v <= 6 ? '中' : '高' } }
+    }
+  }
+});
+
+// 8. Combo Type Chart
+new Chart(document.getElementById('comboChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['买一送一套餐', '饮品+牛角包套餐', '单品', '秋冬热饮套餐'],
+    datasets: [{
+      data: [6, 4, 3, 2],
+      backgroundColor: [colors.keeta, colors.blue, colors.purple, colors.green],
+      borderColor: colors.bg,
+      borderWidth: 3
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16 } }
+    }
+  }
+});
+</script>
+</body>
+</html>
