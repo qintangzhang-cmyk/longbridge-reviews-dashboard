@@ -161,7 +161,7 @@
   <div class="kpi-row">
     <div class="kpi-card kpi-green">
       <div class="label">综合加权评分</div>
-      <div class="value">4.72</div>
+      <div class="value">4.65</div>
       <div class="sub">三平台加权平均</div>
     </div>
     <div class="kpi-card kpi-blue">
@@ -171,7 +171,7 @@
     </div>
     <div class="kpi-card kpi-orange">
       <div class="label">好评率</div>
-      <div class="value">94%</div>
+      <div class="value">89%</div>
       <div class="sub">4星及以上评价占比</div>
     </div>
     <div class="kpi-card kpi-purple">
@@ -367,12 +367,12 @@
             <div class="gauge-ring"><div class="gauge-inner">4.5</div></div>
           </div>
           <div class="gauge-labels">
-            <div class="gauge-row"><span class="gl">1星评价</span><span class="gv gv-red">~8条 (9%)</span></div>
-            <div class="gauge-row"><span class="gl">2星评价</span><span class="gv gv-orange">~2条 (2%)</span></div>
-            <div class="gauge-row"><span class="gl">3星评价</span><span class="gv gv-yellow">~4条 (5%)</span></div>
-            <div class="gauge-row"><span class="gl">4星评价</span><span class="gv gv-green">~7条 (8%)</span></div>
-            <div class="gauge-row"><span class="gl">5星评价</span><span class="gv gv-green">~66条 (76%)</span></div>
-            <div class="gauge-row" style="border-top:1px solid #4a2030;margin-top:4px;padding-top:6px;"><span class="gl" style="color:#f87171;">差评率 (1-2星)</span><span class="gv gv-red" style="font-size:16px;">~11%</span></div>
+            <div class="gauge-row"><span class="gl">1星评价</span><span class="gv gv-red">6条 (7%)</span></div>
+            <div class="gauge-row"><span class="gl">2星评价</span><span class="gv gv-orange">1条 (1%)</span></div>
+            <div class="gauge-row"><span class="gl">3星评价</span><span class="gv gv-yellow">4条 (5%)</span></div>
+            <div class="gauge-row"><span class="gl">4星评价</span><span class="gv gv-green">5条 (6%)</span></div>
+            <div class="gauge-row"><span class="gl">5星评价</span><span class="gv gv-green">71条 (82%)</span></div>
+            <div class="gauge-row" style="border-top:1px solid #4a2030;margin-top:4px;padding-top:6px;"><span class="gl" style="color:#f87171;">差评率 (1-2星)</span><span class="gv gv-red" style="font-size:16px;">8%</span></div>
           </div>
         </div>
       </div>
@@ -387,7 +387,7 @@
       <div class="alert-header">
         <div class="alert-icon">!</div>
         <h3>低分评论详情（1-3星）</h3>
-        <span class="alert-count">Google Maps 共 ~14 条</span>
+        <span class="alert-count">Google Maps 共 11 条</span>
       </div>
 
       <!-- 1-star review -->
@@ -643,7 +643,7 @@ new Chart(document.getElementById('ratingChart'), {
     labels: ['5星', '4星', '3星', '2星', '1星'],
     datasets: [
       { label: 'KeeTa', data: [94, 6, 0, 0, 0], backgroundColor: colors.keeta, borderRadius: 4 },
-      { label: 'Google Maps', data: [62, 15, 8, 5, 10], backgroundColor: colors.google, borderRadius: 4 },
+      { label: 'Google Maps', data: [82, 6, 5, 1, 7], backgroundColor: colors.google, borderRadius: 4 },
       { label: '大众点评', data: [70, 18, 8, 3, 1], backgroundColor: colors.dianping, borderRadius: 4 }
     ]
   },
@@ -760,11 +760,11 @@ new Chart(document.getElementById('lowScoreCompareChart'), {
   data: {
     labels: ['KeeTa', 'Google Maps', '大众点评'],
     datasets: [
-      { label: '1星', data: [0, 9, 1], backgroundColor: '#dc2626', borderRadius: 4 },
-      { label: '2星', data: [0, 2, 3], backgroundColor: '#f97316', borderRadius: 4 },
+      { label: '1星', data: [0, 7, 1], backgroundColor: '#dc2626', borderRadius: 4 },
+      { label: '2星', data: [0, 1, 3], backgroundColor: '#f97316', borderRadius: 4 },
       { label: '3星', data: [0, 5, 8], backgroundColor: '#fbbf24', borderRadius: 4 },
-      { label: '4星', data: [6, 8, 18], backgroundColor: '#60a5fa', borderRadius: 4 },
-      { label: '5星', data: [94, 76, 70], backgroundColor: '#4ade80', borderRadius: 4 }
+      { label: '4星', data: [6, 6, 18], backgroundColor: '#60a5fa', borderRadius: 4 },
+      { label: '5星', data: [94, 82, 70], backgroundColor: '#4ade80', borderRadius: 4 }
     ]
   },
   options: {
