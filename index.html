@@ -451,6 +451,47 @@
         </div>
       </div>
 
+      <!-- Fiona Chan - severe service complaint -->
+      <div class="low-review">
+        <div class="lr-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="lr-author">Fiona Chan</span>
+            <span class="lr-platform" style="background:#1a2744;color:#4285f4;">Google Maps</span>
+            <span style="font-size:11px;color:#dc2626;background:#450a0a;padding:2px 8px;border-radius:4px;">严重服务投诉</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#fbbf24;">&#9733;</span><span style="color:#333;">&#9733;&#9733;&#9733;&#9733;</span>
+            <span class="lr-date">4 个月前</span>
+          </div>
+        </div>
+        <div class="lr-text">服务非常差，从barista到service staff全都黑着脸。本来跟家人坐楼下（楼上只限会员），有一位较为亲切的女生请他们到楼上就坐，后来被另一个女服务员说「谁让这群垃圾上来的」。基本待人接物都不会！</div>
+        <div class="lr-tags">
+          <span class="lr-tag lr-tag-issue">服务态度恶劣</span>
+          <span class="lr-tag lr-tag-issue">员工言语侮辱</span>
+          <span class="lr-tag lr-tag-issue">楼层权限管理混乱</span>
+        </div>
+      </div>
+
+      <!-- Mehmet - membership/seating confusion -->
+      <div class="low-review">
+        <div class="lr-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="lr-author">Mehmet</span>
+            <span class="lr-platform" style="background:#1a2744;color:#4285f4;">Google Maps</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#fbbf24;">&#9733;</span><span style="color:#333;">&#9733;&#9733;&#9733;&#9733;</span>
+            <span class="lr-date">3 个月前</span>
+          </div>
+        </div>
+        <div class="lr-text">Not working at moment, just membership can go upstairs but you can't remember either. It's kind of weird. I waste my money for coffee because I can't sit anywhere and work.</div>
+        <div class="lr-tags">
+          <span class="lr-tag lr-tag-issue">会员制度不清晰</span>
+          <span class="lr-tag lr-tag-issue">无法就坐</span>
+          <span class="lr-tag lr-tag-issue">消费体验差</span>
+        </div>
+      </div>
+
       <!-- Cfutly 5-star but mentions issue -->
       <div class="low-review" style="border-color:#1a2d3d;">
         <div class="lr-header">
@@ -484,6 +525,12 @@
               <div class="issue-freq">提及次数: 3+ | 影响评分: 高</div>
               <div class="issue-detail">多条评论明确提到无卫生间，被建议去对面酒店。影响长时间停留体验，是最高频负面反馈。</div>
               <div class="issue-bar"><div class="issue-bar-fill" style="width:85%"></div></div>
+            </div>
+            <div class="issue-item">
+              <div class="issue-name">&#128544; 服务态度问题</div>
+              <div class="issue-freq">提及次数: 3 | 影响评分: 极高</div>
+              <div class="issue-detail">Fiona Chan反映员工态度恶劣并遭言语侮辱；Mehmet投诉会员制度混乱导致无处就坐；CARL OWUSU评价"Pretentious"。楼层权限管理和员工培训是核心问题。</div>
+              <div class="issue-bar"><div class="issue-bar-fill" style="width:75%;background:linear-gradient(90deg,#dc2626,#f87171)"></div></div>
             </div>
             <div class="issue-item">
               <div class="issue-name">&#128176; 价格偏高</div>
@@ -782,12 +829,13 @@ new Chart(document.getElementById('issueScatterChart'), {
   type: 'bubble',
   data: {
     datasets: [
+      { label: '服务态度问题', data: [{x: 3, y: 9.5, r: 24}], backgroundColor: 'rgba(239,68,68,0.8)', borderColor: '#ef4444' },
       { label: '无洗手间', data: [{x: 3.5, y: 9, r: 22}], backgroundColor: 'rgba(220,38,38,0.7)', borderColor: '#dc2626' },
       { label: '咖啡品质不稳定', data: [{x: 2, y: 8, r: 18}], backgroundColor: 'rgba(249,115,22,0.7)', borderColor: '#f97316' },
       { label: '价格偏高', data: [{x: 2, y: 5, r: 14}], backgroundColor: 'rgba(251,191,36,0.7)', borderColor: '#fbbf24' },
       { label: '食物选择有限', data: [{x: 1, y: 7, r: 10}], backgroundColor: 'rgba(96,165,250,0.7)', borderColor: '#60a5fa' },
       { label: '仅外带杯', data: [{x: 1, y: 4, r: 8}], backgroundColor: 'rgba(192,132,252,0.7)', borderColor: '#c084fc' },
-      { label: '二楼限制', data: [{x: 1.5, y: 3, r: 8}], backgroundColor: 'rgba(74,222,128,0.6)', borderColor: '#4ade80' }
+      { label: '二楼限制/会员制度混乱', data: [{x: 2, y: 6, r: 12}], backgroundColor: 'rgba(74,222,128,0.6)', borderColor: '#4ade80' }
     ]
   },
   options: {
