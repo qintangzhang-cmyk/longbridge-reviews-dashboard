@@ -153,7 +153,7 @@
   <!-- Header -->
   <div class="header">
     <h1>LONGBRIDGE Cafe 多平台评论数据看板</h1>
-    <div class="subtitle">数据汇总时间：2026年4月8日 | 数据范围：近期评论</div>
+    <div class="subtitle">数据汇总时间：2026年4月16日 | 数据范围：近期评论</div>
     <div class="store-info">地址：尖沙咀弥敦道26号 Nathan Road, NO.3 G/F | 营业时间：08:30-19:00</div>
   </div>
 
@@ -166,8 +166,8 @@
     </div>
     <div class="kpi-card kpi-blue">
       <div class="label">总评论数</div>
-      <div class="value">158</div>
-      <div class="sub">KeeTa 15 + Google 87 + 点评 56</div>
+      <div class="value">160</div>
+      <div class="sub">KeeTa 17 + Google 87 + 点评 56</div>
     </div>
     <div class="kpi-card kpi-orange">
       <div class="label">好评率</div>
@@ -188,7 +188,7 @@
       <div class="platform-card keeta">
         <div class="platform-name">KeeTa 外卖平台</div>
         <div class="rating">5.0 <span>/ 5.0</span></div>
-        <div class="review-count">15 条评价（近30天）</div>
+        <div class="review-count">17 条评价（近30天）</div>
         <div class="stars">★★★★★</div>
         <div class="detail-row"><span class="dl">5星占比</span><span class="dv">94%</span></div>
         <div class="detail-row"><span class="dl">4星占比</span><span class="dv">6%</span></div>
@@ -251,7 +251,7 @@
     <div class="section-title">KeeTa 订单热门产品分析</div>
     <div class="grid-2">
       <div class="card">
-        <h3>点单频率统计（基于15条评价订单）</h3>
+        <h3>点单频率统计（基于17条评价订单）</h3>
         <canvas id="keetaProductChart"></canvas>
       </div>
       <div class="card">
@@ -271,9 +271,33 @@
         <div class="review-list">
           <div class="review-item">
             <div class="review-header">
-              <span class="author">黄诗诗</span><span class="date">2026-04-06</span>
+              <span class="author">Anonymous user</span><span class="date">2026-04-14</span>
             </div>
-            <div class="review-text"><span class="badge badge-green">会再光顾</span> 热茉莉花茶拿铁+杏仁牛角包</div>
+            <div class="review-text"><span class="badge badge-green">★★★★★</span> Flat White + 买二送一套餐</div>
+          </div>
+          <div class="review-item">
+            <div class="review-header">
+              <span class="author">kiwi.mi</span><span class="date">2026-04-13</span>
+            </div>
+            <div class="review-text"><span class="badge badge-green">★★★★★</span> 热饮+牛角包套餐</div>
+          </div>
+          <div class="review-item">
+            <div class="review-header">
+              <span class="author">siuyan</span><span class="date">2026-04-11</span>
+            </div>
+            <div class="review-text"><span class="badge badge-green">★★★★★</span> 买二送一套餐</div>
+          </div>
+          <div class="review-item">
+            <div class="review-header">
+              <span class="author">kiwi.mi</span><span class="date">2026-04-09</span>
+            </div>
+            <div class="review-text"><span class="badge badge-green">★★★★★</span> 买二送一套餐 ×2</div>
+          </div>
+          <div class="review-item">
+            <div class="review-header">
+              <span class="author">Sisy Wong</span><span class="date">2026-04-06</span>
+            </div>
+            <div class="review-text"><span class="badge badge-green">会再光顾</span> 热饮+牛角包套餐</div>
           </div>
           <div class="review-item">
             <div class="review-header">
@@ -776,10 +800,10 @@ new Chart(document.getElementById('ratingChart'), {
 new Chart(document.getElementById('timelineChart'), {
   type: 'line',
   data: {
-    labels: ['3/9-3/15', '3/16-3/22', '3/23-3/29', '3/30-4/5', '4/6-4/7'],
+    labels: ['3/9-3/15', '3/16-3/22', '3/23-3/29', '3/30-4/5', '4/6-4/12', '4/13-4/16'],
     datasets: [{
       label: '评论数量',
-      data: [1, 3, 4, 4, 3],
+      data: [1, 3, 4, 4, 3, 2],
       borderColor: colors.keeta,
       backgroundColor: 'rgba(255,149,0,0.1)',
       fill: true,
