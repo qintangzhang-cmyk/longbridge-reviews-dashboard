@@ -145,60 +145,15 @@
   @media (max-width: 768px) {
     .kpi-row, .platform-row, .grid-2, .grid-3 { grid-template-columns: 1fr; }
   }
-
-/* ── AUTH OVERLAY ───────────────────────────────────── */
-#auth-overlay{
-  position:fixed;inset:0;z-index:9999;
-  background:linear-gradient(135deg,#0c1520 0%,#1a2d42 100%);
-  display:flex;align-items:center;justify-content:center;
-}
-.auth-card{
-  background:#fff;border-radius:16px;padding:48px 40px;
-  width:360px;text-align:center;
-  box-shadow:0 24px 64px rgba(0,0,0,.45);
-}
-.auth-logo{font-size:22px;font-weight:800;color:#0c1520;margin-bottom:4px}
-.auth-logo em{font-style:normal;color:#c8a86a}
-.auth-subtitle{font-size:12px;color:#667285;margin-bottom:32px}
-.auth-divider{height:1px;background:#eee;margin:24px 0}
-.auth-error{font-size:12px;color:#b83030;margin-top:16px;min-height:18px}
-#app{display:none}
 </style>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-<!-- AUTH OVERLAY -->
-<div id="auth-overlay">
-  <div class="auth-card">
-    <div class="auth-logo">LONGBRIDGE <em>Café</em></div>
-    <div class="auth-subtitle">内部数据看板 · 仅限员工访问</div>
-    <div id="g_id_onload"
-      data-client_id="884541501389-rsulrh11bksq41k9hpfhol2cks4ue5sj.apps.googleusercontent.com"
-      data-callback="handleGoogleAuth"
-      data-auto_select="true">
-    </div>
-    <div class="g_id_signin"
-      data-type="standard"
-      data-shape="rectangular"
-      data-theme="outline"
-      data-text="signin_with"
-      data-size="large"
-      data-locale="zh_CN"
-      data-width="280">
-    </div>
-    <div id="auth-error" class="auth-error"></div>
-    <div class="auth-divider"></div>
-    <div style="font-size:11px;color:#a4aebe">仅限 @longbridge 邮箱账号访问</div>
-  </div>
-</div>
-<div id="app">
-
 <div class="dashboard">
 
   <!-- Header -->
   <div class="header">
     <h1>LONGBRIDGE Cafe 多平台评论数据看板</h1>
-    <div class="subtitle">数据汇总时间：2026年4月17日 | 数据范围：近期评论</div>
+    <div class="subtitle">数据汇总时间：2026年4月19日 | 数据范围：近期评论</div>
     <div class="store-info">地址：尖沙咀弥敦道26号 Nathan Road, NO.3 G/F | 营业时间：08:30-19:00</div>
   </div>
 
@@ -211,8 +166,8 @@
     </div>
     <div class="kpi-card kpi-blue">
       <div class="label">总评论数</div>
-      <div class="value">160</div>
-      <div class="sub">KeeTa 17 + Google 87 + 点评 56</div>
+      <div class="value">161</div>
+      <div class="sub">KeeTa 17 + Google 88 + 点评 56</div>
     </div>
     <div class="kpi-card kpi-orange">
       <div class="label">好评率</div>
@@ -242,7 +197,7 @@
       <div class="platform-card google">
         <div class="platform-name">Google Maps</div>
         <div class="rating">4.5 <span>/ 5.0</span></div>
-        <div class="review-count">87 条评价</div>
+        <div class="review-count">88 条评价</div>
         <div class="stars">★★★★☆</div>
         <div class="detail-row"><span class="dl">热门标签</span><span class="dv">羊角面包、环境、咖啡师</span></div>
         <div class="detail-row"><span class="dl">评价语言</span><span class="dv">中/英/泰/韩</span></div>
@@ -462,7 +417,7 @@
           <div class="gauge-labels">
             <div class="gauge-row"><span class="gl">1星评价</span><span class="gv gv-red">6条 (7%)</span></div>
             <div class="gauge-row"><span class="gl">2星评价</span><span class="gv gv-orange">1条 (1%)</span></div>
-            <div class="gauge-row"><span class="gl">3星评价</span><span class="gv gv-yellow">4条 (5%)</span></div>
+            <div class="gauge-row"><span class="gl">3星评价</span><span class="gv gv-yellow">5条 (6%)</span></div>
             <div class="gauge-row"><span class="gl">4星评价</span><span class="gv gv-green">5条 (6%)</span></div>
             <div class="gauge-row"><span class="gl">5星评价</span><span class="gv gv-green">71条 (82%)</span></div>
             <div class="gauge-row" style="border-top:1px solid #4a2030;margin-top:4px;padding-top:6px;"><span class="gl" style="color:#f87171;">差评率 (1-2星)</span><span class="gv gv-red" style="font-size:16px;">8%</span></div>
@@ -480,7 +435,49 @@
       <div class="alert-header">
         <div class="alert-icon">!</div>
         <h3>低分评论详情（1-3星）</h3>
-        <span class="alert-count">Google Maps 共 11 条</span>
+        <span class="alert-count">Google Maps 共 13 条</span>
+      </div>
+
+      <!-- KC Low - NEW 3-star review (2026-04-18) -->
+      <div class="low-review" style="border-color:#3d3010;background:linear-gradient(135deg,#1a1d27,#1e1c10);">
+        <div class="lr-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="lr-author">KC Low</span>
+            <span class="lr-platform" style="background:#1a2744;color:#4285f4;">Google Maps</span>
+            <span style="font-size:11px;color:#4ade80;background:#0d2d1a;padding:2px 8px;border-radius:4px;">🆕 最新评论</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#fbbf24;">&#9733;&#9733;&#9733;</span><span style="color:#333;">&#9733;&#9733;</span>
+            <span class="lr-date">17小时前（2026-04-18）</span>
+          </div>
+        </div>
+        <div class="lr-text">Maybe It is because I only take Americano or long black without sugar. Some cafes make better flavoured coffee than just black Americano. If you're like me, maybe you could give it a try sometime to see if you like it.</div>
+        <div class="lr-tags">
+          <span class="lr-tag lr-tag-issue">黑咖啡品质</span>
+          <span class="lr-tag lr-tag-issue">美式口感</span>
+          <span class="lr-tag" style="background:#1a2d1a;color:#86efac;">无服务投诉</span>
+        </div>
+      </div>
+
+      <!-- よう - 1-star service attitude complaint -->
+      <div class="low-review">
+        <div class="lr-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="lr-author">よう</span>
+            <span class="lr-platform" style="background:#1a2744;color:#4285f4;">Google Maps</span>
+            <span style="font-size:11px;color:#dc2626;background:#450a0a;padding:2px 8px;border-radius:4px;">服务态度投诉</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:#fbbf24;">&#9733;</span><span style="color:#333;">&#9733;&#9733;&#9733;&#9733;</span>
+            <span class="lr-date">3 个月前</span>
+          </div>
+        </div>
+        <div class="lr-text">他们的态度真的很差劲。他们肯定以为我是中国人，因为他们用中文跟我说话，但感觉他们根本没在点餐。（Their attitude was really terrible. They probably thought I was Chinese and spoke Chinese to me, but it felt like they weren't taking my order properly.）</div>
+        <div class="lr-tags">
+          <span class="lr-tag lr-tag-issue">服务态度差</span>
+          <span class="lr-tag lr-tag-issue">点单体验差</span>
+          <span class="lr-tag lr-tag-issue">语言歧视感</span>
+        </div>
       </div>
 
       <!-- 1-star review -->
@@ -781,7 +778,7 @@
               <li><strong>买一送一活动效果好</strong>：KeeTa订单中"买一送一"套餐占比超40%，建议持续推广</li>
               <li><strong>复购用户存在</strong>：ysK890810106在5天内下单2次，回头客策略有效</li>
               <li><strong>外卖SKU优化</strong>：拿铁类（茉莉花茶拿铁、西班牙拿铁）和牛角包是爆品，建议开发更多组合</li>
-              <li><strong>Google评论引导</strong>：87条评论中英语评论较多，建议增加中文评论引导</li>
+              <li><strong>Google评论引导</strong>：88条评论中英语评论较多，建议增加中文评论引导</li>
               <li><strong>大众点评运营</strong>：56条评论、环境榜第2，有潜力冲击第1名，建议加强点评运营</li>
             </ul>
           </div>
@@ -827,7 +824,7 @@ new Chart(document.getElementById('ratingChart'), {
     labels: ['5星', '4星', '3星', '2星', '1星'],
     datasets: [
       { label: 'KeeTa', data: [94, 6, 0, 0, 0], backgroundColor: colors.keeta, borderRadius: 4 },
-      { label: 'Google Maps', data: [82, 6, 5, 1, 7], backgroundColor: colors.google, borderRadius: 4 },
+      { label: 'Google Maps', data: [81, 6, 6, 1, 7], backgroundColor: colors.google, borderRadius: 4 },
       { label: '大众点评', data: [70, 18, 8, 3, 1], backgroundColor: colors.dianping, borderRadius: 4 }
     ]
   },
@@ -946,7 +943,7 @@ new Chart(document.getElementById('lowScoreCompareChart'), {
     datasets: [
       { label: '1星', data: [0, 7, 1], backgroundColor: '#dc2626', borderRadius: 4 },
       { label: '2星', data: [0, 1, 3], backgroundColor: '#f97316', borderRadius: 4 },
-      { label: '3星', data: [0, 5, 8], backgroundColor: '#fbbf24', borderRadius: 4 },
+      { label: '3星', data: [0, 6, 8], backgroundColor: '#fbbf24', borderRadius: 4 },
       { label: '4星', data: [6, 6, 18], backgroundColor: '#60a5fa', borderRadius: 4 },
       { label: '5星', data: [94, 82, 70], backgroundColor: '#4ade80', borderRadius: 4 }
     ]
@@ -1005,39 +1002,6 @@ new Chart(document.getElementById('comboChart'), {
     }
   }
 });
-</script>
-
-</div><!-- /#app -->
-<script>
-(function(){
-  const ALLOWED = ["longbridge-inc.com", "longbridge.com", "longbridge.sg", "longbridge.hk"];
-  const STORAGE_KEY = 'cafe_auth_v1';
-  const TTL_MS = 86400000;
-  function showApp() {
-    document.getElementById('auth-overlay').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-  }
-  function parseJwt(token) {
-    try { return JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); }
-    catch(e) { return null; }
-  }
-  window.handleGoogleAuth = function(response) {
-    const payload = parseJwt(response.credential);
-    if (!payload) { document.getElementById('auth-error').textContent = '验证失败，请重试。'; return; }
-    const email = (payload.email || '').toLowerCase();
-    const domain = email.split('@')[1] || '';
-    if (ALLOWED.includes(domain)) {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ email, ts: Date.now() }));
-      showApp();
-    } else {
-      document.getElementById('auth-error').textContent = email + ' 无访问权限，请使用 @longbridge 邮箱。';
-    }
-  };
-  try {
-    const saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || 'null');
-    if (saved && (Date.now() - saved.ts) < TTL_MS) { showApp(); return; }
-  } catch(e) {}
-})();
 </script>
 </body>
 </html>
